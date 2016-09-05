@@ -2,118 +2,67 @@
 
 import UIKit
 
-import UIKit
+import Darwin
 
 
-let heart = UIImage(named: "heart_datatype_0.png")
-
-
-
-
-let size = CGSize(width: 120, height: 200)
-
+let size = CGSize(width: 260, height: 260)
+let pi:CGFloat = CGFloat(M_PI)
 UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-let context = UIGraphicsGetCurrentContext()
+var context = UIGraphicsGetCurrentContext()
+
+
+let fullCirclePath = UIBezierPath(ovalInRect: CGRect(origin: CGPointZero, size: size))
+let glucoseColor = UIColor(red: 251/255.0, green: 0, blue: 105/255.0, alpha: 1)
+glucoseColor.setFill()
+fullCirclePath.fill()
+
+
+let start = CGFloat(-1 * M_PI_2)
+var decimalInput = 0.33
+let end = start + CGFloat(2 * M_PI * decimalInput)
 
 
 
-//Gold colors
-let darkGoldColor = UIColor(red: 0.6, green: 0.5, blue: 0.15, alpha: 1.0)
-let midGoldColor = UIColor(red: 0.86, green: 0.73, blue: 0.3, alpha: 1.0)
-let lightGoldColor = UIColor(red: 1.0, green: 0.98, blue: 0.9, alpha: 1.0)
-
-//Add Shadow
-let shadow:UIColor = UIColor.blackColor().colorWithAlphaComponent(0.80)
-let shadowOffset = CGSizeMake(2.0, 2.0)
-let shadowBlurRadius: CGFloat = 5
-
-CGContextSetShadowWithColor(context,
-                            shadowOffset,
-                            shadowBlurRadius,
-                            shadow.CGColor)
-
-CGContextBeginTransparencyLayer(context, nil)
-
-//Lower Ribbon
-var lowerRibbonPath = UIBezierPath()
-lowerRibbonPath.moveToPoint(CGPointMake(0, 0))
-lowerRibbonPath.addLineToPoint(CGPointMake(40,0))
-lowerRibbonPath.addLineToPoint(CGPointMake(78, 70))
-lowerRibbonPath.addLineToPoint(CGPointMake(38, 70))
-lowerRibbonPath.closePath()
-UIColor.redColor().setFill()
-lowerRibbonPath.fill()
-
-//Clasp
-
-var claspPath = UIBezierPath(roundedRect:
-    CGRectMake(36, 62, 43, 20),
-                             cornerRadius: 5)
-claspPath.lineWidth = 5
-darkGoldColor.setStroke()
-claspPath.stroke()
-
-//Medallion
-
-var medallionPath = UIBezierPath(ovalInRect:
-    CGRect(origin: CGPointMake(8, 72),
-        size: CGSizeMake(100, 100)))
-CGContextSaveGState(context)
-medallionPath.addClip()
-let gradient = CGGradientCreateWithColors(
-    CGColorSpaceCreateDeviceRGB(),
-    [darkGoldColor.CGColor,
-        midGoldColor.CGColor,
-        lightGoldColor.CGColor],
-    [0, 0.51, 1])
 
 
-CGContextDrawLinearGradient(context,
-                            gradient,
-                            CGPointMake(40, 40),
-                            CGPointMake(100,160),
-                            [])
-CGContextRestoreGState(context)
+let overlayCirclePath = UIBezierPath()
+overlayCirclePath.addLineToPoint(CGPoint(x: 130, y: 30))
+overlayCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: start, endAngle: end , clockwise: true)
+overlayCirclePath.addLineToPoint(CGPoint(x: 130, y: 130))
 
-//Create a transform
-//Scale it, and translate it right and down
-var transform = CGAffineTransformMakeScale(0.8, 0.8)
-transform = CGAffineTransformTranslate(transform, 15, 30)
+let overlayColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+overlayColor.setFill()
+overlayCirclePath.fill()
 
-medallionPath.lineWidth = 2.0
+let innerCirclePath = UIBezierPath()
+innerCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+let lighter = UIColor(red: 1, green: 1, blue: 1, alpha: 0.3)
+lighter.setFill()
+innerCirclePath.fill()
 
-//apply the transform to the path
-medallionPath.applyTransform(transform)
-medallionPath.stroke()
 
-//Upper Ribbon
 
-//Number One
+var circlePath = UIBezierPath()
+circlePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 70, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+glucoseColor.setFill()
+circlePath.fill()
 
-//Must be NSString to be able to use drawInRect()
-let numberOne = "1"
-let numberOneRect = CGRectMake(47, 100, 50, 50)
-let font = UIFont(name: "Academy Engraved LET", size: 60)
-let textStyle = NSMutableParagraphStyle.defaultParagraphStyle()
-let numberOneAttributes = [
-    NSFontAttributeName: font!,
-    NSForegroundColorAttributeName: darkGoldColor]
-numberOne.drawInRect(numberOneRect,
-                     withAttributes:numberOneAttributes)
 
-var upperRibbonPath = UIBezierPath()
-upperRibbonPath.moveToPoint(CGPointMake(68, 0))
-upperRibbonPath.addLineToPoint(CGPointMake(108, 0))
-upperRibbonPath.addLineToPoint(CGPointMake(78, 70))
-upperRibbonPath.addLineToPoint(CGPointMake(38, 70))
-upperRibbonPath.closePath()
 
-UIColor.blueColor().setFill()
-upperRibbonPath.fill()
 
-CGContextEndTransparencyLayer(context)
 
-//This code must always be at the end of the playground
-let image = UIGraphicsGetImageFromCurrentImageContext()
+
+let test = UIGraphicsGetImageFromCurrentImageContext()
 UIGraphicsEndImageContext()
+
+
+//let circleCenter = CGPointMake(100, 100)
+//
+//let circleRadius = CGFloat(40)
+//
+//
+//let testPath = UIBezierPath(arcCenter: circleCenter, radius: circleRadius, startAngle: start, endAngle: end, clockwise: true)
+//testPath.addLineToPoint(circleCenter)
+//UIColor.blackColor().setFill()
+//testPath.fill()
 
