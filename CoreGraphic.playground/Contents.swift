@@ -18,11 +18,8 @@ fullCirclePath.fill()
 
 
 let start = CGFloat(-1 * M_PI_2)
-var decimalInput = 0.33
+var decimalInput = 0.25
 let end = start + CGFloat(2 * M_PI * decimalInput)
-
-
-
 
 
 let overlayCirclePath = UIBezierPath()
@@ -32,23 +29,29 @@ overlayCirclePath.addLineToPoint(CGPoint(x: 130, y: 130))
 
 let overlayColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
 overlayColor.setFill()
+
+
+var headPath = UIBezierPath()
+headPath.addArcWithCenter(CGPoint(x: 130,y:45), radius: 15, startAngle: start, endAngle: start + 2 * pi * 0.5 , clockwise: false)
+overlayColor.setFill()
+headPath.fill()
 overlayCirclePath.fill()
 
-let innerCirclePath = UIBezierPath()
-innerCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+let lightCirclePath = UIBezierPath()
+lightCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: 0, endAngle: 2 * pi , clockwise: true)
 let lighter = UIColor(red: 1, green: 1, blue: 1, alpha: 0.3)
 lighter.setFill()
+lightCirclePath.fill()
+
+var innerCirclePath = UIBezierPath()
+innerCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 70, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+glucoseColor.setFill()
 innerCirclePath.fill()
 
-
-
-var circlePath = UIBezierPath()
-circlePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 70, startAngle: 0, endAngle: 2 * pi , clockwise: true)
-glucoseColor.setFill()
-circlePath.fill()
-
-
-
+var dialButtonPath = UIBezierPath()
+dialButtonPath.addArcWithCenter(CGPoint(x: 215,y:130), radius: 20, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+UIColor.whiteColor().setFill()
+dialButtonPath.fill()
 
 
 
