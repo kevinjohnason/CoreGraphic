@@ -6,7 +6,17 @@ import Darwin
 
 
 private func drawBackground(input:Double,subTitle:String)->UIImage{
-    let size = CGSize(width: 260, height: 260)
+    let fillCircleRadius : CGFloat = 130
+    let overlayCircleRadius : CGFloat = 110
+    let innerCircleRadius : CGFloat = 86
+
+    let buttonRadius : CGFloat = 20
+    let centerPoint = CGPoint(x: fillCircleRadius,y:fillCircleRadius)
+    let buttonToCenterPointLength = innerCircleRadius + (overlayCircleRadius - innerCircleRadius) / 2
+    let headRadius : CGFloat = (overlayCircleRadius - innerCircleRadius) / 2
+    let headY : CGFloat = fillCircleRadius - buttonToCenterPointLength
+    
+    let size = CGSize(width: fillCircleRadius * 2, height: fillCircleRadius * 2)
     let pi:CGFloat = CGFloat(M_PI)
     UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
     let fullCirclePath = UIBezierPath(ovalInRect: CGRect(origin: CGPointZero, size: size))
@@ -20,37 +30,37 @@ private func drawBackground(input:Double,subTitle:String)->UIImage{
     
     let overlayCirclePath = UIBezierPath()
     overlayCirclePath.addLineToPoint(CGPoint(x: 130, y: 30))
-    overlayCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: start, endAngle: end , clockwise: true)
-    overlayCirclePath.addLineToPoint(CGPoint(x: 130, y: 130))
+    overlayCirclePath.addArcWithCenter(centerPoint, radius: overlayCircleRadius, startAngle: start, endAngle: end , clockwise: true)
+    overlayCirclePath.addLineToPoint(centerPoint)
     
     let overlayColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
     overlayColor.setFill()
     
     
     let headPath = UIBezierPath()
-    headPath.addArcWithCenter(CGPoint(x: 130,y:45), radius: 15, startAngle: start, endAngle: start + 2 * pi * 0.5 , clockwise: false)
+    headPath.addArcWithCenter(CGPoint(x: 130,y:headY), radius: headRadius, startAngle: start, endAngle: start + 2 * pi * 0.5 , clockwise: false)
     overlayColor.setFill()
     headPath.fill()
     overlayCirclePath.fill()
     
     let lightCirclePath = UIBezierPath()
-    lightCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 100, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+    lightCirclePath.addArcWithCenter(centerPoint, radius: overlayCircleRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
     let lighter = UIColor(red: 1, green: 1, blue: 1, alpha: 0.3)
     lighter.setFill()
     lightCirclePath.fill()
     
     let innerCirclePath = UIBezierPath()
-    innerCirclePath.addArcWithCenter(CGPoint(x: 130,y:130), radius: 70, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+    innerCirclePath.addArcWithCenter(centerPoint, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
     glucoseColor.setFill()
     innerCirclePath.fill()
     
     
     let dialButtonPath = UIBezierPath()
     let degree : CGFloat = CGFloat(input * 360 - 90)
-    let dialX:CGFloat = 130 + 85 * cos(degree * pi / 180)
-    let dialY:CGFloat = 130 + 85 * sin(degree * pi / 180)
+    let dialX:CGFloat = fillCircleRadius + buttonToCenterPointLength * cos(degree * pi / 180)
+    let dialY:CGFloat = fillCircleRadius + buttonToCenterPointLength * sin(degree * pi / 180)
     
-    dialButtonPath.addArcWithCenter(CGPoint(x: dialX,y:dialY), radius: 20, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+    dialButtonPath.addArcWithCenter(CGPoint(x: dialX,y:dialY), radius: buttonRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
     UIColor.whiteColor().setFill()
     dialButtonPath.fill()
     
@@ -73,7 +83,7 @@ private func drawBackground(input:Double,subTitle:String)->UIImage{
     
 }
 
-drawBackground(0.11,subTitle: "mg/dL")
+drawBackground(0.31,subTitle: "mg/dL")
 
 
 
