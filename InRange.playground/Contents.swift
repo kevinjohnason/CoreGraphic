@@ -4,58 +4,202 @@ import UIKit
 
 import Darwin
 
+let fillCircleRadius : CGFloat = 130
+let innerCircleRadius : CGFloat = 100
+let centerPoint = CGPoint(x: fillCircleRadius,y:fillCircleRadius)
+let size = CGSize(width: fillCircleRadius * 2, height: fillCircleRadius * 2)
 let pi:CGFloat = CGFloat(M_PI)
 
-private func drawBackground(){
-    let fillCircleRadius : CGFloat = 130
-    let innerCircleRadius : CGFloat = 100
-    let centerPoint = CGPoint(x: fillCircleRadius,y:fillCircleRadius)
-    let size = CGSize(width: fillCircleRadius * 2, height: fillCircleRadius * 2)
-    let pi:CGFloat = CGFloat(M_PI)
-    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-    let fullCirclePath = UIBezierPath(ovalIn: CGRect(origin: CGPoint.zero, size: size))
-    let bottomColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
-    bottomColor.setFill()
-    fullCirclePath.fill()
 
-    let lightCirclePath = UIBezierPath()
-    lightCirclePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
-    let lighter = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
-    lighter.setFill()
-    lightCirclePath.fill()
+class GlucosePoint{
+    var glucoseValue:Float
     
-    let glucoseRangeColor = UIColor(displayP3Red: 251/255.0, green: 0, blue: 105/255.0, alpha: 0.6)
-    glucoseRangeColor.setStroke()
-    glucoseRangeColor.setFill()
-    //innerCirclePath.stroke()
+    var angle:CGFloat {
+        get{
+            return CGFloat((glucoseValue / 450.0) * 360.0)
+        }
+    }
     
-    let outerCirclePath = UIBezierPath()
-    outerCirclePath.lineWidth = 4
-    outerCirclePath.addArc(withCenter: centerPoint, radius: fillCircleRadius, startAngle: 0, endAngle: 180/180  * pi , clockwise: true)
+    init(value:Float){
+        glucoseValue = value
+        
+    }
     
+    lazy var pointCenter:CGPoint = {
+        return self.getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: CGFloat(self.angle))
+    }()
     
-    let point = getPoint(center: centerPoint, radius: innerCircleRadius, degree: 180)
-    outerCirclePath.addLine(to: point)
-    outerCirclePath.move(to: point)
-    outerCirclePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: 180/180 * pi, endAngle: 0, clockwise: false)
-    outerCirclePath.addLine(to: getPoint(center: centerPoint, radius: fillCircleRadius, degree: 0))
-    outerCirclePath.fill()
+    let glucoseColor = UIColor(red: 251/255.0, green: 0, blue: 105/255.0, alpha: 1)
+    func drawPoint(){
+        glucoseColor.setFill()
+        let glucosePath = UIBezierPath()
+        glucosePath.addArc(withCenter: pointCenter, radius: 11, startAngle: 0, endAngle: 2 * pi, clockwise: true)
+        glucosePath.fill()
+    }
     
-    let beginingHeadPath = UIBezierPath()
-    let beginingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: 0)
-    beginingHeadPath.addArc(withCenter: beginingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: pi, endAngle: 0, clockwise: true)
-    beginingHeadPath.fill()
+    func getPoint(center:CGPoint,radius:CGFloat,degree:CGFloat) -> CGPoint{
+        let x:CGFloat = center.x + radius * cos(degree * pi / 180)
+        let y:CGFloat = center.y + radius * sin(degree * pi / 180)
+        return CGPoint(x: x, y: y)
+    }
     
-    
-    let endingHeadPath = UIBezierPath()
-    let endingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: 180)
-    endingHeadPath.addArc(withCenter: endingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: pi, endAngle: 0, clockwise: true)
-    endingHeadPath.fill()
-    
-    
-    UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
+    func drawValue(){
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        let numberAttrs = [NSFontAttributeName: UIFont.systemFont(ofSize: 15), NSParagraphStyleAttributeName: paragraphStyle,NSForegroundColorAttributeName:UIColor.white]
+        let numberString = String(format:"%.0f",glucoseValue)
+        numberString.draw(with: CGRect(x: pointCenter.x - 10,y: pointCenter.y - 5,width: 20,height: 10), options: .usesLineFragmentOrigin, attributes: numberAttrs, context: nil)
+    }
 }
+
+
+class GlucoseRange{
+    let glucoseRangeColor = UIColor(displayP3Red: 251/255.0, green: 0, blue: 105/255.0, alpha: 0.6)
+    var glucosePoints:[GlucosePoint]
+    lazy var inRangePoints:[GlucosePoint] = {
+        return  self.glucosePoints.filter { (point:GlucosePoint) -> Bool in
+            return point.glucoseValue >= self.lowRange && point.glucoseValue <= self.highRange
+        }
+    }()
+    var highRange:Float
+    var lowRange:Float
+    init(points:[GlucosePoint],high:Float,low:Float){
+        glucosePoints = points
+        highRange = high
+        lowRange = low
+    }
+    
+    var maxPoint:GlucosePoint{
+        get{
+            let max = glucosePoints.max { (a:GlucosePoint, b:GlucosePoint) -> Bool in
+                return a.glucoseValue < b.glucoseValue
+            }
+            return max!
+        }
+    }
+    
+    var minPoint:GlucosePoint{
+        get{
+            let min = glucosePoints.min { (a:GlucosePoint, b:GlucosePoint) -> Bool in
+                return a.glucoseValue < b.glucoseValue
+            }
+            return min!
+        }
+    }
+    
+    var maxPointInRange:GlucosePoint{
+        get{
+            let max = inRangePoints.max { (a:GlucosePoint, b:GlucosePoint) -> Bool in
+                return a.glucoseValue < b.glucoseValue
+            }
+            return max!
+        }
+    }
+    
+    var minPointInRange:GlucosePoint{
+        get{
+            let min = inRangePoints.min { (a:GlucosePoint, b:GlucosePoint) -> Bool in
+                return a.glucoseValue < b.glucoseValue
+            }
+            return min!
+        }
+    }
+    
+    var startAngle:CGFloat{
+        return minPoint.angle
+    }
+    
+    var endingAngel:CGFloat{
+        return maxPoint.angle
+    }
+    
+    var inRangeStartAngle:CGFloat{
+        return minPointInRange.angle
+    }
+    
+    var inRangeEndingAngle:CGFloat{
+        return maxPointInRange.angle
+    }
+    
+    func drawPoints(){
+        for point in glucosePoints{
+            point.drawPoint()
+        }
+    }
+    func getPoint(center:CGPoint,radius:CGFloat,degree:CGFloat) -> CGPoint{
+        let x:CGFloat = center.x + radius * cos(degree * pi / 180)
+        let y:CGFloat = center.y + radius * sin(degree * pi / 180)
+        return CGPoint(x: x, y: y)
+    }
+    
+    func drawInRangeCoverage(){
+        let inRangePath = UIBezierPath()
+        inRangePath.lineWidth = 2
+        UIColor.white.setStroke()
+        inRangePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: inRangeStartAngle/180.0 * pi, endAngle: inRangeEndingAngle / 180.0 * pi, clockwise: true)
+        inRangePath.move(to: getPoint(center: centerPoint, radius: fillCircleRadius, degree: inRangeStartAngle))
+        inRangePath.addArc(withCenter: centerPoint, radius: fillCircleRadius , startAngle: inRangeStartAngle/180.0 * pi, endAngle: inRangeEndingAngle / 180.0 * pi, clockwise: true)
+        inRangePath.stroke()
+        let beginingHeadPath = UIBezierPath()
+        beginingHeadPath.lineWidth = 2
+        let beginingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: inRangeStartAngle)
+        beginingHeadPath.addArc(withCenter: beginingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: (inRangeStartAngle / 180) * pi, endAngle: (inRangeStartAngle + 180) / 180 * pi, clockwise: false)
+        beginingHeadPath.stroke()
+        let endingHeadPath = UIBezierPath()
+        endingHeadPath.lineWidth = 2
+        let endingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: inRangeEndingAngle)
+        endingHeadPath.addArc(withCenter: endingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: (inRangeEndingAngle / 180) * pi, endAngle: (inRangeEndingAngle + 180) / 180 * pi, clockwise: true)
+        endingHeadPath.stroke()
+    }
+    
+    
+    func drawFullCoverage(){
+        glucoseRangeColor.setFill()
+        let inRangePath = UIBezierPath()
+        inRangePath.lineWidth = 2
+        inRangePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: startAngle/180.0 * pi, endAngle: endingAngel / 180.0 * pi, clockwise: true)
+        let endingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: endingAngel)
+        inRangePath.addArc(withCenter: endingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: (endingAngel / 180) * pi, endAngle: (endingAngel + 180) / 180 * pi, clockwise: true)
+        inRangePath.addArc(withCenter: centerPoint, radius: fillCircleRadius , startAngle: endingAngel/180.0 * pi, endAngle: startAngle / 180.0 * pi, clockwise: false)
+        let beginingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: startAngle)
+        inRangePath.addArc(withCenter: beginingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: (startAngle / 180) * pi, endAngle: (startAngle + 180) / 180 * pi, clockwise: false)
+        inRangePath.fill()
+    }
+    
+    func drawBackground(){
+        let fullCirclePath = UIBezierPath(ovalIn: CGRect(origin: CGPoint.zero, size: size))
+        let bottomColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
+        bottomColor.setFill()
+        fullCirclePath.fill()
+        let lightCirclePath = UIBezierPath()
+        lightCirclePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
+        let lighter = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+        lighter.setFill()
+        lightCirclePath.fill()
+    }
+    
+    
+    static func drawInRangeChart(){
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        let range = GlucoseRange(points: [GlucosePoint(value:180),GlucosePoint(value:60),GlucosePoint(value:90),GlucosePoint(value:100),GlucosePoint(value:120),GlucosePoint(value:135)],high:150,low:80)
+        range.drawBackground()
+        range.drawFullCoverage()
+        range.drawPoints()
+        range.maxPoint.drawValue()
+        range.minPoint.drawValue()
+        range.drawInRangeCoverage()
+        UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+    }
+    
+}
+
+
+GlucoseRange.drawInRangeChart()
+
+
+
+
 
 func drawContent(input:Double,unit:String){
     let fillCircleRadius : CGFloat = 130
@@ -126,10 +270,9 @@ func getPoint(center:CGPoint,radius:CGFloat,degree:CGFloat) -> CGPoint{
 
 
 
-drawBackground()
 
-//drawContent(input: 0.2, unit: "mg/dL")
-//getImage()
+
+
 
 
 
