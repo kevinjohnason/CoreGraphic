@@ -167,10 +167,26 @@ class GlucoseRange{
     }
     
     func drawBackground(){
-        let fullCirclePath = UIBezierPath(ovalIn: CGRect(origin: CGPoint.zero, size: size))
+        //ovalIn: CGRect(origin: CGPoint.zero, size: size)
+        let fullCirclePath = UIBezierPath()
+        fullCirclePath.move(to: centerPoint)
+        fullCirclePath.addArc(withCenter: centerPoint, radius: fillCircleRadius, startAngle: -0.4 * pi, endAngle: 1.4 * pi, clockwise: true)
         let bottomColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
         bottomColor.setFill()
         fullCirclePath.fill()
+        
+        let beginingHeadPath = UIBezierPath()
+        let beginingCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: -360 * 0.4 / 2)
+        beginingHeadPath.addArc(withCenter: beginingCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: 0, endAngle: 2 * pi, clockwise: false)
+        beginingHeadPath.fill()
+        
+        let endingHeadPath = UIBezierPath()
+        let endiningCenter = getPoint(center: centerPoint, radius: innerCircleRadius + (fillCircleRadius - innerCircleRadius) / 2, degree: 360 * 1.4 / 2)
+        endingHeadPath.addArc(withCenter: endiningCenter, radius: (fillCircleRadius - innerCircleRadius) / 2, startAngle: 0, endAngle: 2 * pi, clockwise: false)
+        endingHeadPath.fill()
+        
+        
+    
         let lightCirclePath = UIBezierPath()
         lightCirclePath.addArc(withCenter: centerPoint, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * pi , clockwise: true)
         let lighter = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
